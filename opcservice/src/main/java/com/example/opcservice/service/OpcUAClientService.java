@@ -1,82 +1,225 @@
 package com.example.opcservice.service;
 
+import com.example.opcservice.dto.ConnectionDTO;
+import com.example.opcservice.dto.CreateNodeDTO;
+import io.netty.util.concurrent.CompleteFuture;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.aopalliance.intercept.MethodInvocation;
 import org.eclipse.milo.opcua.sdk.client.AddressSpace;
 import org.eclipse.milo.opcua.sdk.client.api.subscriptions.UaMonitoredItem;
 import org.eclipse.milo.opcua.sdk.client.api.subscriptions.UaSubscription;
 import org.eclipse.milo.opcua.sdk.client.nodes.UaNode;
+import org.eclipse.milo.opcua.sdk.client.nodes.UaObjectNode;
 import org.eclipse.milo.opcua.sdk.client.nodes.UaVariableNode;
 import org.eclipse.milo.opcua.sdk.client.OpcUaClient;
 
-import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
-import org.eclipse.milo.opcua.stack.core.types.builtin.StatusCode;
-import org.eclipse.milo.opcua.stack.core.types.builtin.Variant;
+import org.eclipse.milo.opcua.stack.core.UaException;
+import org.eclipse.milo.opcua.stack.core.types.builtin.*;
+import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UByte;
 import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
 import org.eclipse.milo.opcua.stack.core.types.enumerated.MonitoringMode;
+import org.eclipse.milo.opcua.stack.core.types.enumerated.NodeClass;
 import org.eclipse.milo.opcua.stack.core.types.enumerated.TimestampsToReturn;
-import org.eclipse.milo.opcua.stack.core.types.structured.MonitoredItemCreateRequest;
-import org.eclipse.milo.opcua.stack.core.types.structured.MonitoringParameters;
-import org.eclipse.milo.opcua.stack.core.types.structured.ReadValueId;
-import org.springframework.scheduling.annotation.Scheduled;
+import org.eclipse.milo.opcua.stack.core.types.structured.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
+import java.sql.Timestamp;
 import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 
 
 @Service
+@RequiredArgsConstructor
 @Slf4j
 public class OpcUAClientService {
-    private OpcUaClient opcUaClient;
+
+    private final SocketSendService socketSendService;
+
+    private ConcurrentHashMap<String,OpcUaClient> opcUaClient = new ConcurrentHashMap<>();
     private boolean isConnected = false;
     private int writeValue = 3;
 
 
-    public void connect(String endpoint) {
+//    public void connect(ConnectionDTO connectionDTO) {
+////        try {
+////            opcUaClient = OpcUaClient.create(connectionDTO.getUrl());
+////            opcUaClient.connect().get();
+////            isConnected = true;
+////
+////            for (String nodeId : connectionDTO.getNodeList()) {
+////                createMonitoredItem(nodeId);
+////            }
+////            //todo: добавить запрос в бд или редис для построения нод
+////        }catch (Exception e) {
+////            log.error(e.getMessage());
+////        }
+//    }
+
+    public void connect(ConnectionDTO connectionDTO) {
+        String url = connectionDTO.getUrl();
         try {
-            opcUaClient = OpcUaClient.create(endpoint);
-            opcUaClient.connect().get();
+            if(!opcUaClient.containsKey(url)) {
+                opcUaClient.put(url,OpcUaClient.create(url));
+            }
+            opcUaClient.get(url).connect().get();
+
             isConnected = true;
-            createMonitoredItem();
-        }catch (Exception e) {
+
+            if(!iaNodeExists(url,connectionDTO.getNodeId())) {
+                createNodeByServerNode(new CreateNodeDTO(
+                        url,
+                        connectionDTO.getNodeId(),
+                        null,
+                        connectionDTO.getPeriod()
+                ));
+
+                return;
+            }
+
+            createMonitoredItem(url,connectionDTO.getNodeId(),connectionDTO.getPeriod());
+
+        } catch (Exception e) {
             log.error(e.getMessage());
         }
     }
 
-    //@Scheduled(fixedRate = 1000)
-    public void readNode() throws Exception {
-        if(isConnected) {
-            NodeId id = new NodeId(1, "myVariable");
+    public void connect(String url) {
+        try {
+            if(!opcUaClient.containsKey(url)) {
+                opcUaClient.put(url,OpcUaClient.create(url));
+            }
+            opcUaClient.get(url).connect().get();
 
-            //AddressSpace space = opcUaClient.getAddressSpace();
-
-//            UaVariableNode variableNode = opcUaClient.getAddressSpace().getVariableNode(id);
-//
-//            String name = variableNode.getDisplayName().getText();
-            //Variant value = variableNode.getValue().getValue();
-
-            Variant value = opcUaClient.readValue(0.0, TimestampsToReturn.Both,id).get().getValue();
-
-            //System.out.println("Name: " + name);
-            System.out.println("Значение переменной: " + value);
-            //writeNode(id, value);
-        }else {
-            System.out.println("Ожидаение подключения");
+        } catch (Exception e) {
+            log.error(e.getMessage());
         }
     }
 
-    private void writeNode(NodeId nodeName,Variant value) throws Exception {
-        UaVariableNode variableNode = opcUaClient.getAddressSpace().getVariableNode(nodeName);
-        //value = variableNode.getValue().getValue();
-        Variant variant = new Variant(writeValue++);
-        variableNode.writeValue(variant);
+    public void createNode() throws Exception{
+        NodeId nodeId = new NodeId(1,"TestNode");
+        NodeClass nodeClass = NodeClass.Variable;
+
+        UInteger writeMask = UInteger.valueOf(0);
+        UInteger userWriteMask = UInteger.valueOf(0);
+
+        QualifiedName browseName = new QualifiedName(1,"TestNode");
+
+        LocalizedText description = new LocalizedText("en","LLLLLLOOOOOOLLLLL");
+        LocalizedText displayName = new LocalizedText("en","TestNode");
+        UInteger accessLevel = UInteger.valueOf(3);
+        UByte userAccessLevel = UByte.valueOf(3);
+
+        ExpandedNodeId requestedNewNode = ExpandedNodeId.parse( nodeId.toString() );
+
+        ObjectAttributes objectAttributes = new ObjectAttributes(
+                writeMask,description,displayName,userWriteMask,accessLevel,userAccessLevel
+        );
+
+        ExpandedNodeId parentNodeId = ExpandedNodeId.parse("ns=1;s=RootNode");
+
+        AddNodesItem addNodesItem = new AddNodesItem(
+                parentNodeId,
+                NodeId.NULL_VALUE,
+                requestedNewNode,
+                browseName,
+                nodeClass,
+                null,
+                ExpandedNodeId.NULL_VALUE);
+
+        String audit = "";
+
+        RequestHeader requestHeader = new RequestHeader(
+                new NodeId(0,"RequestHandler"),
+                DateTime.now(),
+                UInteger.valueOf(1),
+                UInteger.valueOf(0),
+                audit,
+                UInteger.valueOf(60000),
+                null
+        );
+
+        AddNodesItem[] items = new AddNodesItem[]{addNodesItem};
+
+        AddNodesRequest addNodesRequest = new AddNodesRequest(requestHeader,items);
     }
 
-    public void readNode(String nodeId) throws Exception {
+    public boolean iaNodeExists(String url, String nodeId) {
+    try {
+        NodeId nid = new NodeId(1,nodeId);
+        UaNode testNodeTry = opcUaClient.get(url).getAddressSpace().getNode(nid);
+    }catch (UaException e){
+        return false;
+    }
+    return true;
+    }
+
+    public void createNodeByServerNode(CreateNodeDTO createNodeDTO){
+        boolean connected = false;
+        try {
+            if (!opcUaClient.containsKey(createNodeDTO.getUrl())) {
+                opcUaClient.put(createNodeDTO.getUrl(), OpcUaClient.create(createNodeDTO.getUrl()));
+                opcUaClient.get(createNodeDTO.getUrl()).connect().get();
+            }else {
+                connected = true;
+            }
+        }catch (Exception e) {
+            log.error(e.getMessage());
+        }
+
+        NodeId objectId = new NodeId(1,"MyObject");
+        NodeId methodId = new NodeId(1,"addNodesMethod");
+
+
+        try {
+            UaNode testNodeTry = opcUaClient.get(createNodeDTO.getUrl()).getAddressSpace().getNode(objectId);
+            if(testNodeTry != null){
+                System.out.println("Node already exists");
+            }
+        } catch (UaException e) {
+            throw new RuntimeException(e);
+        }
+
+        try {
+            UaNode testNodeTry = opcUaClient.get(createNodeDTO.getUrl()).getAddressSpace().getNode(methodId);
+            if(testNodeTry != null){
+                System.out.println("Node already exists");
+            }
+        } catch (UaException e) {
+            throw new RuntimeException(e);
+        }
+
+        Variant[] inputs = new Variant[]{
+                new Variant(createNodeDTO.getNodeName()),
+                new Variant((createNodeDTO.getDescription()!=null)?createNodeDTO.getDescription():"Default description for "+createNodeDTO.getNodeName())
+        };
+
+        CallMethodRequest request = new CallMethodRequest(objectId,methodId,inputs);
+        try {
+            CompletableFuture<CallMethodResult> result = opcUaClient.get(createNodeDTO.getUrl()).call(request);
+            System.out.println("Status code: "+ result.get().getStatusCode());
+            //System.out.println(StatusCode.GOOD);
+            if(result.get().getStatusCode().equals(StatusCode.GOOD)){
+                createMonitoredItem(createNodeDTO.getUrl(),createNodeDTO.getNodeName(),createNodeDTO.getPeriod());
+            }
+            if(!connected){
+                disconnect(createNodeDTO.getUrl());
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    public void readNode(String url, String nodeId) throws Exception {
         NodeId id = new NodeId(1, nodeId);
 
-        AddressSpace space = opcUaClient.getAddressSpace();
+        AddressSpace addressSpace = opcUaClient.get(url).getAddressSpace();
 
-        UaVariableNode variableNode = opcUaClient.getAddressSpace().getVariableNode(id);
+        UaVariableNode variableNode = opcUaClient.get(url).getAddressSpace().getVariableNode(id);
 
         String name = variableNode.getDisplayName().getText();
         Variant value = variableNode.getValue().getValue();
@@ -86,10 +229,10 @@ public class OpcUAClientService {
 
     }
 
-    public void createMonitoredItem() throws Exception {
-        UaSubscription subscription = opcUaClient.getSubscriptionManager().createSubscription(1000.0).get();
+    public void createMonitoredItem(String url, String nodeName,Double period) throws Exception {
+        UaSubscription subscription = opcUaClient.get(url).getSubscriptionManager().createSubscription(period).get();
 
-        NodeId nodeId = new NodeId(1, "myVariable");
+        NodeId nodeId = new NodeId(1, nodeName);
 
         ReadValueId readValueId = new ReadValueId(nodeId,
                 UInteger.valueOf(13),
@@ -98,7 +241,7 @@ public class OpcUAClientService {
 
         MonitoringParameters parameters = new MonitoringParameters(
                  UInteger.valueOf(1),
-                1000.0,
+                1.0,
                 null,
                 null,
                 Boolean.TRUE
@@ -122,14 +265,15 @@ public class OpcUAClientService {
 
         for (UaMonitoredItem item: subscription.getMonitoredItems()) {
             item.setValueConsumer(value->{
-                System.out.println("Сейчас значение ноды:" + value);
+                socketSendService.sendMessage(nodeId.getIdentifier().toString(),(Double) value.getValue().getValue());
+                System.out.println("Имя ноды: "+nodeId.getIdentifier()+" Сейчас значение ноды:" + value);
             });
         }
     }
 
-    public void disconnect() throws Exception {
+    public void disconnect(String url) throws Exception {
         if (opcUaClient != null) {
-            opcUaClient.disconnect().get();
+            opcUaClient.get(url).disconnect().get();
             isConnected = false;
             System.out.println("Disconnected from OPC UA server");
         }

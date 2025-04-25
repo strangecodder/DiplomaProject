@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: analyticservice
+  datasource:
+    url: jdbc:postgresql://localhost:5432/maintenancedb
+    username: user
+    password: password
+    driver-class-name: org.postgresql.Driver
+  jpa:
+      hibernate:
+        ddl-auto: update
