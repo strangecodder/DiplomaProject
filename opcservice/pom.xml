@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.4.4</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
+    <groupId>com.example</groupId>
+    <artifactId>opcservice</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <name>opcservice</name>
+    <description>opcservice</description>
+    <url/>
+    <licenses>
+        <license/>
+    </licenses>
+    <developers>
+        <developer/>
+    </developers>
+    <scm>
+        <connection/>
+        <developerConnection/>
+        <tag/>
+        <url/>
+    </scm>
+    <properties>
+        <java.version>17</java.version>
+    </properties>
+
+<!--    <repositories>-->
+<!--        <repository>-->
+<!--            <id>inductiveautomation</id>-->
+<!--            <url>https://maven.inductiveautomation.com/repo/</url>-->
+<!--        </repository>-->
+<!--    </repositories>-->
+
+    <repositories>
+        <repository>
+            <id>eclipse-repo</id>
+            <url>https://repo.eclipse.org/content/repositories/releases/</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/com.inductiveautomation.opcua/opc-ua-client -->
+        <!-- https://mvnrepository.com/artifact/com.inductiveautomation.opcua/opc-ua-client -->
+        <!-- https://mvnrepository.com/artifact/com.inductiveautomation.xopc/opc-ua-client -->
+        <dependency>
+            <groupId>org.eclipse.milo</groupId>
+            <artifactId>sdk-client</artifactId>
+            <version>0.6.15</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.milo</groupId>
+            <artifactId>stack-client</artifactId>
+            <version>0.6.15</version> <!-- Проверьте последнюю версию -->
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-websocket</artifactId>
+        </dependency>
+
+<!--        <dependency>-->
+<!--            <groupId>org.eclipse.milo</groupId>-->
+<!--            <artifactId>org.eclipse.milo.opcua.stack</artifactId>-->
+<!--            <version>0.6.4</version>-->
+<!--        </dependency>-->
+
+<!--        <dependency>-->
+<!--            <groupId>org.eclipse.milo</groupId>-->
+<!--            <artifactId>org.eclipse.milo.opcua.client</artifactId>-->
+<!--            <version>0.6.0</version> &lt;!&ndash; Обновленная версия &ndash;&gt;-->
+<!--        </dependency>-->
+
+
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <scope>runtime</scope>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+<!--    <repositories>-->
+<!--        <repository>-->
+<!--            <id>inductiveautomation-repo</id>-->
+<!--            <url>https://mvnrepository.com/artifact/com.inductiveautomation.opcua/</url> &lt;!&ndash; Замените на правильный URL &ndash;&gt;-->
+<!--        </repository>-->
+<!--    </repositories>-->
+
+<!--    <repositories>-->
+<!--        <repository>-->
+<!--            <id>eclipse-repo</id>-->
+<!--            <url>https://repo.eclipse.org/content/repositories/releases/</url>-->
+<!--        </repository>-->
+<!--    </repositories>-->
+
+<!--    <repositories>-->
+<!--        <repository>-->
+<!--            <id>inductiveautomation</id>-->
+<!--            <url>https://maven.inductiveautomation.com/repo/</url>-->
+<!--        </repository>-->
+<!--    </repositories>-->
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
