@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class AnalyticserviceApplication {
+public class BackendserviceApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(AnalyticserviceApplication.class, args);
+        SpringApplication.run(BackendserviceApplication.class, args);
     }
 
 }

@@ -1,6 +1,6 @@
 spring:
   application:
-    name: analyticservice
+    name: backendservice
   datasource:
     url: jdbc:postgresql://localhost:5432/maintenancedb
     username: user

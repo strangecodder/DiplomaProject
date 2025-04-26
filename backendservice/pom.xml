@@ -11,8 +11,8 @@
     <groupId>com.example</groupId>
     <artifactId>backendservice</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>analyticservice</name>
-    <description>analyticservice</description>
+    <name>backendservice</name>
+    <description>backendservice</description>
     <url/>
     <licenses>
         <license/>
