@@ -1,5 +1,6 @@
 package com.example.opcservice.service;
 
+import com.example.opcservice.dto.LogDTO;
 import com.example.opcservice.dto.SensorValueDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -20,7 +21,12 @@ public class SocketSendService {
         valueDto.setSensorId(sensorId);
         valueDto.setValue(value);
         messagingTemplate.convertAndSend("/topic/messages", valueDto);
-        System.out.println("Message sent");
+    }
+
+    @MessageMapping("/message")
+    @SendTo("/topic/analytic")
+    public void sendAnalytic(LogDTO logDTO) {
+        messagingTemplate.convertAndSend("/topic/analytic", logDTO);
     }
 
 }
