@@ -1,16 +1,16 @@
 package com.example.opcservice.service;
 
+import com.commondto.dto.SensorValueDTO;
 import com.example.opcservice.dto.ConnectionDTO;
 import com.example.opcservice.dto.CreateNodeDTO;
-import io.netty.util.concurrent.CompleteFuture;
+import com.example.opcservice.dto.LogDTO;
+import com.example.opcservice.kafka.producer.KafkaSensorDataSender;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.aopalliance.intercept.MethodInvocation;
 import org.eclipse.milo.opcua.sdk.client.AddressSpace;
 import org.eclipse.milo.opcua.sdk.client.api.subscriptions.UaMonitoredItem;
 import org.eclipse.milo.opcua.sdk.client.api.subscriptions.UaSubscription;
 import org.eclipse.milo.opcua.sdk.client.nodes.UaNode;
-import org.eclipse.milo.opcua.sdk.client.nodes.UaObjectNode;
 import org.eclipse.milo.opcua.sdk.client.nodes.UaVariableNode;
 import org.eclipse.milo.opcua.sdk.client.OpcUaClient;
 
@@ -23,14 +23,11 @@ import org.eclipse.milo.opcua.stack.core.types.enumerated.NodeClass;
 import org.eclipse.milo.opcua.stack.core.types.enumerated.TimestampsToReturn;
 import org.eclipse.milo.opcua.stack.core.types.structured.*;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.sql.Timestamp;
 import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
 
 
 @Service
@@ -39,6 +36,8 @@ import java.util.concurrent.ExecutionException;
 public class OpcUAClientService {
 
     private final SocketSendService socketSendService;
+
+    private final KafkaSensorDataSender sensorDataSender;
 
     private ConcurrentHashMap<String,OpcUaClient> opcUaClient = new ConcurrentHashMap<>();
     private boolean isConnected = false;
@@ -266,7 +265,18 @@ public class OpcUAClientService {
         for (UaMonitoredItem item: subscription.getMonitoredItems()) {
             item.setValueConsumer(value->{
                 socketSendService.sendMessage(nodeId.getIdentifier().toString(),(Double) value.getValue().getValue());
-                System.out.println("Имя ноды: "+nodeId.getIdentifier()+" Сейчас значение ноды:" + value);
+                socketSendService.sendAnalytic(new LogDTO(nodeId.getIdentifier().toString(),
+                        (Double) value.getValue().getValue(),
+                                new Timestamp(value.getServerTime().getJavaTime()))
+                );
+                        System.out.println("Имя ноды: "+nodeId.getIdentifier()+" Сейчас значение ноды:" + value);
+                //todo
+                System.out.println("Url ноды: "+url);
+                sensorDataSender.sendDataToSave(new SensorValueDTO(url,
+                        nodeId.getIdentifier().toString(),
+                        (Double) value.getValue().getValue(),
+                        new Timestamp(value.getServerTime().getJavaTime()))
+                );
             });
         }
     }
