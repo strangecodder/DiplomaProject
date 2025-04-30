@@ -11,8 +11,10 @@ import java.util.List;
 
 @Repository
 public interface MachineSensorRepository extends JpaRepository<MachineSensor, Long> {
-    //List<Sensor> findAllByMachine(Machine machine);
-    List<Sensor> findSensorsByMachine(Machine machine);
+    List<MachineSensor> findByMachine(Machine machine);
 
     int countSensorsByMachine(Machine machine);
+
+    MachineSensor findMachineSensorBySensor_OpcUaServerAndSensor_NodeId(String opcUaServer, String nodeId);
+
 }
