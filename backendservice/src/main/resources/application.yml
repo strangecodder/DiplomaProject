@@ -1,6 +1,13 @@
 spring:
   application:
     name: backendservice
+  kafka:
+    bootstrap-servers: localhost:9092
+#    todo: посмотреть на необходимость
+    consumer:
+      properties:
+        spring.json.trusted.packages: '*'
+
   datasource:
     url: jdbc:postgresql://localhost:5432/maintenancedb
     username: user
