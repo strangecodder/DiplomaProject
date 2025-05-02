@@ -24,16 +24,6 @@ public class MainController {
         }
     }
 
-//    @PostMapping("/connect")
-//    public String simpleConnect(@RequestParam String url) {
-//        try {
-//            opcUaClientService.connect(url);
-//            return "Connected to OPC UA server.";
-//        } catch (Exception e) {
-//            return "Failed to connect: " + e.getMessage();
-//        }
-//    }
-
     @GetMapping("/read")
     public String readNode(@RequestParam String url,
                            @RequestParam String nodeId) {
