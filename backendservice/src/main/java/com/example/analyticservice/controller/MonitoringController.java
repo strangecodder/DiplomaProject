@@ -22,21 +22,10 @@ public class MonitoringController {
 
     private final MonitoringWebService monitoringWebService;
     private final MachineRepository machineRepository;
-    private final MachineSensorRepository machineSensorRepository;
 
     @GetMapping("/allMachines")
-    public ResponseEntity<List<MachinesDTO>> getAllMachines() {
-        List<Machine> machines = machineRepository.findAll();
-        List<MachinesDTO> response = machines.
-                stream().
-                map(machine -> new MachinesDTO(machine.getMachineId(),
-                        machine.getName(),
-                        machine.getType(),
-                        machine.getState(),
-                        machineSensorRepository.countSensorsByMachine(machine)
-                )).
-                toList();
-        return new ResponseEntity<>(response, HttpStatus.OK);
+    public List<MachinesDTO> getAllMachines() {
+        return monitoringWebService.getAllMachines();
     }
 
     @GetMapping("/machineNodes")
@@ -45,27 +34,21 @@ public class MonitoringController {
     }
 
     @GetMapping("/machineInfo")
-    public ResponseEntity<Machine> getMachine(@RequestParam Long machineId) {
-        return new ResponseEntity<>(machineRepository.findById(machineId).get(), HttpStatus.OK);
+    public Machine getMachine(@RequestParam Long machineId) {
+        return monitoringWebService.getMachineById(machineId);
     }
 
     @PostMapping("/createMachine")
-    @Transactional
     public void createMachine(@RequestBody CreateMachineDTO newMachine) {
-        Machine machine = new Machine();
-        machine.setName(newMachine.getMachineName());
-        machine.setType(newMachine.getMachineType());
-        machine.setState(MachineState.INACTIVE);
-        machineRepository.save(machine);
+        monitoringWebService.saveMachine(newMachine);
     }
 
     @PostMapping("/setMachineState")
     @Transactional
-    public ResponseEntity<HttpStatus> setMachineState(@RequestBody MachineStateDTO machineStateDTO) {
+    public void setMachineState(@RequestBody MachineStateDTO machineStateDTO) {
         Machine machine = new Machine();
         machine.setState(machineStateDTO.getState());
         machineRepository.save(machine);
-        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PostMapping("/addSensorConfig")
