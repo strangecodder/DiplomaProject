@@ -4,6 +4,7 @@ import lombok.Data;
 
 @Data
 public class FullReportDTO {
+    private Long code;
     private String username;
 
     private String machineName;
