@@ -21,9 +21,6 @@ public class MonitoringService {
     @Transactional
     public void saveValue(SensorValueDTO sensorValueDTO) {
         MachineData machineData = new MachineData();
-
-        //Sensor sensor = machineSensorRepository.findSensorBySensor_NodeId(sensorValueDTO.getNodeName());
-
         Sensor sensor = machineSensorRepository.findMachineSensorBySensor_OpcUaServerAndSensor_NodeId(
                 sensorValueDTO.getServerUrl(),
                 sensorValueDTO.getNodeName()
