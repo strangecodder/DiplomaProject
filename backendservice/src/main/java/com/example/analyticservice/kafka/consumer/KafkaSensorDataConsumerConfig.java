@@ -36,9 +36,7 @@ public class KafkaSensorDataConsumerConfig {
         );
 
         JsonDeserializer<SensorValueDTO> jsonDeserializer = new JsonDeserializer<>(SensorValueDTO.class);
-        jsonDeserializer.addTrustedPackages("com.example.analyticservice.dto"); // Убедитесь, что ваш пакет указан здесь
-        jsonDeserializer.addTrustedPackages("com.example.commondto.dto"); // Убедитесь, что ваш пакет указан здесь
-
+        jsonDeserializer.addTrustedPackages("com.example.commondto.dto");
 
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
                 jsonDeserializer);
