@@ -13,5 +13,13 @@ public class KafkaTopic {
         return TopicBuilder.name("log-data").build();
     }
 
-    //todo: добавить ещё топики, если надо?
+    @Bean
+    public NewTopic reportTopic() {
+        return TopicBuilder.name("data-report").build();
+    }
+
+    @Bean
+    public NewTopic fullReportTopic() {
+        return TopicBuilder.name("full-report").build();
+    }
 }
