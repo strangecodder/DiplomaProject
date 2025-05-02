@@ -4,7 +4,6 @@ import com.example.opcservice.dto.ConnectionDTO;
 import com.example.opcservice.dto.CreateNodeDTO;
 import com.example.opcservice.service.OpcUAClientService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
