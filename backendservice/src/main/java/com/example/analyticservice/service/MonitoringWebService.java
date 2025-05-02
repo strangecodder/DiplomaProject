@@ -1,7 +1,10 @@
 package com.example.analyticservice.service;
 
+import com.example.analyticservice.dto.CreateMachineDTO;
+import com.example.analyticservice.dto.MachinesDTO;
 import com.example.analyticservice.dto.SensorConfigDTO;
 import com.example.analyticservice.dto.SensorMonitoringDTO;
+import com.example.analyticservice.entity.Machine;
 import com.example.analyticservice.entity.MachineSensor;
 import com.example.analyticservice.entity.Sensor;
 import com.example.analyticservice.repository.MachineRepository;
@@ -22,6 +25,23 @@ public class MonitoringWebService {
     private final SensorRepository sensorRepository;
     private final MachineSensorRepository machineSensorRepository;
     private final MachineRepository machineRepository;
+    private final MonitoringService monitoringService;
+
+    public List<MachinesDTO> getAllMachines(){
+        return  machineRepository.findAll().
+                stream().
+                map(machine -> new MachinesDTO(machine.getMachineId(),
+                        machine.getName(),
+                        machine.getType(),
+                        machine.getState(),
+                        machineSensorRepository.countSensorsByMachine(machine)
+                )).
+                toList();
+    }
+
+    public Machine getMachineById(Long id){
+        return machineRepository.findById(id).orElse(null);
+    }
 
     public ResponseEntity<List<SensorMonitoringDTO>> getMachineNodes(Long machineId) {
 
@@ -47,6 +67,11 @@ public class MonitoringWebService {
                 sensor.getOpcUaServer(),
                 sensor.getPeriod()
         );
+    }
+
+
+    public void saveMachine(CreateMachineDTO createMachineDTO){
+        monitoringService.saveMachine(createMachineDTO);
     }
 
     @Transactional
