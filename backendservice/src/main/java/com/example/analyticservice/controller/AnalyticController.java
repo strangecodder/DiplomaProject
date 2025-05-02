@@ -16,29 +16,11 @@ import java.util.List;
 @CrossOrigin(origins = "http://localhost:3000")
 public class AnalyticController {
 
-    /*
-    *     public List<MachinesAnalyticDTO> getMachinesBySensorId() {
-        return  machineRepository.findAll().stream()
-                .map(machine -> new MachinesAnalyticDTO(
-                        machine.getName(),
-                        machine.getType(),
-                        machineSensorRepository.countSensorsByMachine(machine),
-                        getLogsCount(machine.getMachineId())
-                )).
-                toList();
-    }
-    * */
-
     private final AnalyticService analyticService;
 
     @GetMapping("/getMachines")
     public List<MachinesAnalyticDTO> getMachines() {
         return analyticService.getMachinesBySensorId();
-    }
-
-    @GetMapping("/getMachine")
-    public void getMachine(@RequestParam("machineId") Long machineId) {
-
     }
 
     @GetMapping("/getAllLogs")
