@@ -2,8 +2,6 @@ package com.example.analyticservice.service;
 
 import com.example.analyticservice.dto.ChartDTO;
 import com.example.analyticservice.dto.MachinesAnalyticDTO;
-import com.example.analyticservice.dto.MachinesDTO;
-import com.example.analyticservice.entity.Machine;
 import com.example.analyticservice.entity.MachineData;
 import com.example.analyticservice.entity.MachineSensor;
 import com.example.analyticservice.entity.Sensor;
@@ -14,9 +12,7 @@ import com.example.analyticservice.repository.SensorRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
