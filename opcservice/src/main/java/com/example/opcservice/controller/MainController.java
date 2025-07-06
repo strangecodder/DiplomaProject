@@ -35,7 +35,7 @@ public class MainController {
     }
 
     @PostMapping("/tryCreate")
-    public void tryCreate(@RequestBody CreateNodeDTO createNodeDTO){
+    public void createNode(@RequestBody CreateNodeDTO createNodeDTO){
         opcUaClientService.createNodeByServerNode(createNodeDTO);
     }
 
