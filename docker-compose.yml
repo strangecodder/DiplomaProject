@@ -33,7 +33,6 @@ services:
       - "5432:5432"
     volumes:
       - postgres-data:/var/lib/postgres/data/pgdata
-    #      - postgres-data:/var/lib/postgres/data/pgdata
     deploy:
       resources:
         limits:
