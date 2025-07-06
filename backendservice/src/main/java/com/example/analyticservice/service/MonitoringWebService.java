@@ -1,5 +1,7 @@
 package com.example.analyticservice.service;
 
+import com.example.analyticservice.dto.CreateMachineDTO;
+import com.example.analyticservice.dto.MachinesDTO;
 import com.example.analyticservice.dto.SensorConfigDTO;
 import com.example.analyticservice.dto.SensorMonitoringDTO;
 import com.example.analyticservice.entity.Machine;
@@ -7,78 +9,68 @@ import com.example.analyticservice.entity.MachineSensor;
 import com.example.analyticservice.entity.Sensor;
 import com.example.analyticservice.repository.MachineRepository;
 import com.example.analyticservice.repository.MachineSensorRepository;
-import com.example.analyticservice.repository.SensorRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class MonitoringWebService {
 
-    private final SensorRepository sensorRepository;
     private final MachineSensorRepository machineSensorRepository;
     private final MachineRepository machineRepository;
+    private final MonitoringService monitoringService;
 
-    public ResponseEntity<List<SensorMonitoringDTO>> getMachineNodes(Long machineId) {
-        //List<Sensor> sensors = machineSensorRepository.findSensorsByMachine(
-          //      machineRepository.findById(machineId).get());
+    public List<MachinesDTO> getAllMachines(){
+        return  machineRepository.findAll().
+                stream().
+                map(machine -> new MachinesDTO(machine.getMachineId(),
+                        machine.getName(),
+                        machine.getType(),
+                        machine.getState(),
+                        machineSensorRepository.countSensorsByMachine(machine)
+                )).
+                toList();
+    }
 
-        List<MachineSensor> machineSensors = machineSensorRepository.findAll();
+    public Machine getMachineById(Long id){
+        return machineRepository.findById(id).orElse(null);
+    }
 
-        List<Sensor> sensors = machineSensors.stream()
+    public List<SensorMonitoringDTO> getMachineNodes(Long machineId) {
+
+        List<Sensor> sensors = machineSensorRepository.findAll().stream()
                 .filter(machineSensor -> machineSensor.getMachine().getMachineId().equals(machineId))
-                .map(sensor -> sensor.getSensor())
-                .collect(Collectors.toList());
+                .map(MachineSensor::getSensor)
+                .toList();
 
-        List<SensorMonitoringDTO> monitoringDTOS = new ArrayList<>();
+        List<SensorMonitoringDTO> monitoringDTOS = sensors.stream()
+                .map(this::convertToMonitoringDTO)
+                .toList();
 
-        for (Sensor sensor : sensors) {
-            SensorMonitoringDTO sensorMonitoringDTO = new SensorMonitoringDTO();
-            sensorMonitoringDTO.setSensorId(sensor.getSensorId());
-            sensorMonitoringDTO.setSensorName(sensor.getSensorName());
-            sensorMonitoringDTO.setNodeId(sensor.getNodeId());
-            sensorMonitoringDTO.setMeasurementUnit(sensor.getMeasurementUnit());
-            sensorMonitoringDTO.setOpcUaServer(sensor.getOpcUaServer());
-            sensorMonitoringDTO.setPeriod(sensor.getPeriod());
-            monitoringDTOS.add(sensorMonitoringDTO);
-        }
-
-        return new ResponseEntity<>(monitoringDTOS, HttpStatus.OK);
+        return monitoringDTOS;
     }
 
-    public void saveAndSend(SensorConfigDTO sensorConfigDTO){
-        addNewSensorNode(sensorConfigDTO);
-
-
-        //todo: потом добавить отправку по кафке
+    private SensorMonitoringDTO convertToMonitoringDTO(Sensor sensor) {
+        return new SensorMonitoringDTO(
+                sensor.getSensorId(),
+                sensor.getSensorName(),
+                sensor.getNodeId(),
+                sensor.getMeasurementUnit(),
+                0d,
+                sensor.getOpcUaServer(),
+                sensor.getPeriod()
+        );
     }
 
-    @Transactional
-    public void addNewSensorNode(SensorConfigDTO sensorConfigDTO) {
-        Sensor sensor = new Sensor();
-        sensor.setSensorName(sensorConfigDTO.getSensorName());
-        sensor.setSensorType(sensorConfigDTO.getSensorType());
-        sensor.setSensorDescription(sensorConfigDTO.getSensorDescription());
-        sensor.setMeasurementUnit(sensorConfigDTO.getMeasurementUnit());
-        sensor.setOpcUaServer(sensorConfigDTO.getUrl());
-        sensor.setNodeId(sensorConfigDTO.getNodeName());
-        sensor.setPeriod(sensorConfigDTO.getPeriod());
-        sensorRepository.save(sensor);
-        addToMachineSensor(sensor.getSensorId(),sensorConfigDTO.getMachineId());
+
+    public void saveMachine(CreateMachineDTO createMachineDTO){
+        monitoringService.saveMachine(createMachineDTO);
     }
 
-    @Transactional
-    public void addToMachineSensor(long sensorId, long machineId) {
-        MachineSensor machineSensor = new MachineSensor();
-        machineSensor.setSensor(sensorRepository.findById(sensorId).get());
-        machineSensor.setMachine(machineRepository.findById(machineId).get());
-        machineSensorRepository.save(machineSensor);
+    public void addNewSensor(SensorConfigDTO sensorConfigDTO) {
+        monitoringService.addNewSensorNode(sensorConfigDTO);
     }
+
 }

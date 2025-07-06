@@ -4,3 +4,5 @@ server:
 spring:
   application:
     name: opcservice
+  kafka:
+    bootstrap-servers: localhost:9092

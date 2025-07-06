@@ -30,6 +30,10 @@ public class Machine {
     @Column(name = "opc_server")
     private String opcServer;
 
+    @OneToOne
+    @JoinColumn(name = "workplace",referencedColumnName = "workplace_id")
+    private Workplace workplace;
+
     @Column(name = "state")
     private MachineState state;
 }

@@ -3,16 +3,16 @@ package com.example.opcservice.controller;
 import com.example.opcservice.dto.ConnectionDTO;
 import com.example.opcservice.dto.CreateNodeDTO;
 import com.example.opcservice.service.OpcUAClientService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/")
+@RequiredArgsConstructor
 @CrossOrigin
 public class MainController {
 
-    @Autowired
-    private OpcUAClientService opcUaClientService;
+    private final OpcUAClientService opcUaClientService;
 
     @PostMapping("/connect")
     public String connect(@RequestBody ConnectionDTO connectionDTO) {
@@ -21,27 +21,6 @@ public class MainController {
             return "Connected to OPC UA server.";
         } catch (Exception e) {
             return "Failed to connect: " + e.getMessage();
-        }
-    }
-
-//    @PostMapping("/connect")
-//    public String simpleConnect(@RequestParam String url) {
-//        try {
-//            opcUaClientService.connect(url);
-//            return "Connected to OPC UA server.";
-//        } catch (Exception e) {
-//            return "Failed to connect: " + e.getMessage();
-//        }
-//    }
-
-    @GetMapping("/read")
-    public String readNode(@RequestParam String url,
-                           @RequestParam String nodeId) {
-        try {
-            opcUaClientService.readNode(url,nodeId);
-            return "Read node successfully.";
-        } catch (Exception e) {
-            return "Failed to read node: " + e.getMessage();
         }
     }
 
@@ -56,7 +35,7 @@ public class MainController {
     }
 
     @PostMapping("/tryCreate")
-    public void tryCreate(@RequestBody CreateNodeDTO createNodeDTO){
+    public void createNode(@RequestBody CreateNodeDTO createNodeDTO){
         opcUaClientService.createNodeByServerNode(createNodeDTO);
     }
 

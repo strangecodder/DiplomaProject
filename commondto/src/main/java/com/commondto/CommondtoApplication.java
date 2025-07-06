@@ -1,13 +1,13 @@
-package com.example.analyticservice;
+package com.commondto;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class AnalyticserviceApplication {
+public class CommondtoApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(AnalyticserviceApplication.class, args);
+        SpringApplication.run(CommondtoApplication.class, args);
     }
 
 }
