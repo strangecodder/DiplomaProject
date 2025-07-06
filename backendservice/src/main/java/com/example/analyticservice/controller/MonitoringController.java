@@ -29,7 +29,7 @@ public class MonitoringController {
     }
 
     @GetMapping("/machineNodes")
-    public ResponseEntity<List<SensorMonitoringDTO>> getMachineNodes(@RequestParam Long machineId) {
+    public List<SensorMonitoringDTO> getMachineNodes(@RequestParam Long machineId) {
         return monitoringWebService.getMachineNodes(machineId);
     }
 
@@ -52,8 +52,7 @@ public class MonitoringController {
     }
 
     @PostMapping("/addSensorConfig")
-    public ResponseEntity<HttpStatus> addSensor(@RequestBody SensorConfigDTO sensorConfigDTO){
-        monitoringWebService.addNewSensorNode(sensorConfigDTO);
-        return new ResponseEntity<>(HttpStatus.OK);
+    public void addSensor(@RequestBody SensorConfigDTO sensorConfigDTO){
+        monitoringWebService.addNewSensor(sensorConfigDTO);
     }
 }
