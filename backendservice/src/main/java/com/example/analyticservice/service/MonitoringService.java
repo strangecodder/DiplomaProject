@@ -1,6 +1,5 @@
 package com.example.analyticservice.service;
 
-import com.commondto.dto.FullReportDTO;
 import com.commondto.dto.SensorValueDTO;
 import com.example.analyticservice.dto.CreateMachineDTO;
 import com.example.analyticservice.dto.SensorConfigDTO;
