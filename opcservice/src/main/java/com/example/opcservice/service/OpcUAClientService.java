@@ -47,7 +47,7 @@ public class OpcUAClientService {
             }
             opcUaClient.get(url).connect().get();
 
-            if(!iaNodeExists(url,connectionDTO.getNodeId())) {
+            if(!isNodeExists(url,connectionDTO.getNodeId())) {
                 createNodeByServerNode(new CreateNodeDTO(
                         url,
                         connectionDTO.getNodeId(),
@@ -63,7 +63,7 @@ public class OpcUAClientService {
         }
     }
 
-    public boolean iaNodeExists(String url, String nodeId) {
+    public boolean isNodeExists(String url, String nodeId) {
     try {
         NodeId nid = new NodeId(1,nodeId);
         UaNode testNodeTry = opcUaClient.get(url).getAddressSpace().getNode(nid);
@@ -88,7 +88,6 @@ public class OpcUAClientService {
 
         NodeId objectId = new NodeId(1,"MyObject");
         NodeId methodId = new NodeId(1,"addNodesMethod");
-
 
         try {
             UaNode testNodeTry = opcUaClient.get(createNodeDTO.getUrl()).getAddressSpace().getNode(objectId);
@@ -149,7 +148,7 @@ public class OpcUAClientService {
         MonitoredItemCreateRequest request = new MonitoredItemCreateRequest(
                 readValueId,
                 MonitoringMode.Reporting,
-          parameters
+                parameters
         );
 
         var requests = Arrays.asList(request);
@@ -181,7 +180,7 @@ public class OpcUAClientService {
     }
 
     public void disconnect(String url) throws Exception {
-        if (opcUaClient != null && opcUaClient.contains(url)) {
+        if (opcUaClient != null && opcUaClient.containsKey(url)) {
             opcUaClient.get(url).disconnect().get();
             System.out.println("Disconnected from OPC UA server");
         }
