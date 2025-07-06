@@ -20,7 +20,7 @@ public class AnalyticController {
 
     @GetMapping("/getMachines")
     public List<MachinesAnalyticDTO> getMachines() {
-        return analyticService.getMachinesBySensorId();
+        return analyticService.getAllMachines();
     }
 
     @GetMapping("/getAllLogs")
