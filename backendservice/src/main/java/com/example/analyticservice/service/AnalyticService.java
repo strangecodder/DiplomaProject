@@ -24,7 +24,7 @@ public class AnalyticService {
     private final SensorRepository sensorRepository;
 
 
-    public List<MachinesAnalyticDTO> getMachinesBySensorId() {
+    public List<MachinesAnalyticDTO> getAllMachines() {
           List<MachinesAnalyticDTO> analyticDTOS = machineRepository.findAll().stream()
                 .map(machine -> new MachinesAnalyticDTO(
                         machine.getMachineId(),
