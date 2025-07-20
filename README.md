@@ -2,7 +2,7 @@
 ## Description
 This project is my diploma work like a those two repositories:
 1. Frontend part: https://github.com/strangecodder/DiplomaProjectFront
-2. OPC UA servers by C: 
+2. OPC UA servers by C:
 The main aim of this project is realize server what can communicate with a IIoT gateway, that in IIRA architecture and in IIoT conception respond on sensors changes and send data to server
 
 ## Описание
